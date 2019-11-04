@@ -157,6 +157,8 @@ bool FDHss::init(hss_config_t * hss_config_p){
       FDPeer *peer = new FDPeer( mme ? mme : (char*)"mme.localdomain" );
       m_mme_peers.push_back( peer );
 
+       Logger::system().startup( "into FDHss::init mme:[%s], mme.localdomain:[%s]",   mme?mme:"mme==NULL", (char*)"mme.localdomain");
+
       if(!m_diameter.start()){
          return false;
       }

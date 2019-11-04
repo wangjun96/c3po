@@ -378,6 +378,93 @@ void IDRRreq::processAnswer( FDMessageAnswer &ans )
    //Extract the IDA.
    InsertSubscriberDataAnswerExtractor ida(ans, getApplication().getDict() );
 
+   /*
+    * class Application : public ApplicationBase
+{
+    friend ACRreq;
+
+public:
+    Application();
+    ~Application();
+
+    // Parameters for sendXXXreq, if present below, may be changed
+    // based upon processing needs
+    bool sendACRreq(FDPeer &peer);
+
+private:
+	void registerHandlers();
+
+	ACRcmd m_cmd_acr;
+
+	// the parameters for createXXXreq, if present below, may be
+	// changed based processing needs
+    ACRreq *createACRreq(FDPeer &peer);
+
+
+};
+    class Application : public ApplicationBase
+{
+    friend UPLRreq;
+    friend CALRreq;
+    friend AUIRreq;
+    friend INSDRreq;
+    friend DESDRreq;
+    friend PUURreq;
+    friend RERreq;
+
+public:
+    Application( DataAccess &dbobj );
+    ~Application();
+
+    UPLRcmd &getUPLRcmd() { return m_cmd_uplr; }
+    //CALRcmd &getCALRcmd() { return m_cmd_calr; }
+    AUIRcmd &getAUIRcmd() { return m_cmd_auir; }
+    //INSDRcmd &getINSDRcmd() { return m_cmd_insdr; }
+    //DESDRcmd &getDESDRcmd() { return m_cmd_desdr; }
+    PUURcmd &getPUURcmd() { return m_cmd_puur; }
+    //RERcmd &getRERcmd() { return m_cmd_rer; }
+
+    // Parameters for sendXXXreq, if present below, may be changed
+    // based upon processing needs
+    bool sendUPLRreq(FDPeer &peer);
+    bool sendCALRreq(FDPeer &peer);
+    bool sendAUIRreq(FDPeer &peer);
+    int  sendINSDRreq(s6t::MonitoringEventConfigurationExtractorList &cir_monevtcfg,
+                      std::string& imsi, FDMessageRequest *cir_req, EvenStatusMap *evt_map,
+                      RIRBuilder * rir_builder);
+    bool sendDESDRreq(FDPeer &peer);
+    bool sendPUURreq(FDPeer &peer);
+    bool sendRERreq(FDPeer &peer);
+
+    DataAccess &dataaccess() { return m_dbobj; }
+
+private:
+    void registerHandlers();
+    UPLRcmd m_cmd_uplr;
+    //CALRcmd m_cmd_calr;
+    AUIRcmd m_cmd_auir;
+    //INSDRcmd m_cmd_insdr;
+    //DESDRcmd m_cmd_desdr;
+    PUURcmd m_cmd_puur;
+    //RERcmd m_cmd_rer;
+
+    // the parameters for createXXXreq, if present below, may be
+    // changed based processing needs
+    UPLRreq *createUPLRreq(FDPeer &peer);
+    CALRreq *createCALRreq(FDPeer &peer);
+    AUIRreq *createAUIRreq(FDPeer &peer);
+    INSDRreq *createINSDRreq(s6t::MonitoringEventConfigurationExtractorList &cir_monevtcfg,
+                            std::string& imsi, FDMessageRequest *cir_req, EvenStatusMap *evt_map,
+                            DAImsiInfo &imsi_info, RIRBuilder * rir_builder);
+    DESDRreq *createDESDRreq(FDPeer &peer);
+    PUURreq *createPUURreq(FDPeer &peer);
+    RERreq *createRERreq(FDPeer &peer);
+
+    DataAccess &m_dbobj;
+};
+
+
+    * */
    //Build the CIA from the stored request.
    s6t::Application * s6tApp = fdHss.gets6tApp();
 
@@ -1009,6 +1096,7 @@ void ULRProcessor::on_ulr_callback(CassFuture *future, void *data)
 printf("%lld,%s,%p,%s\n",STIMER_GET_CURRENT_TIME,__PRETTY_FUNCTION__,&action->getProcessor(),actions[actionofs]);
 #endif
 
+    Logger::s6as6d().warn("into ULRProcessor::on_ulr_callback  action->getAction: (%u)", action->getAction());
    switch (action->getAction())
    {
       case ULRDB_GET_IMSI_INFO:
@@ -1038,6 +1126,7 @@ printf("%lld,%s,%p,%s\n",STIMER_GET_CURRENT_TIME,__PRETTY_FUNCTION__,&action->ge
       }
       case ULRDB_GET_MMEID_HOST:
       {
+          Logger::s6as6d().warn("into ULRDB_GET_MMEID_HOST ");
          action->getProcessor().getMmeIdentity(f);
          break;
       }
@@ -1081,20 +1170,24 @@ bool ULRProcessor::phaseReady(int phase, uint32_t adjustment)
    };
 #endif
 
+    Logger::s6as6d().warn("into ULRProcessor::phaseReady  (%u)", phase);
    switch (phase)
    {
       case ULRSTATE_PHASE1:
       {
+          Logger::s6as6d().warn("into phase1  (%u)", phase);
          ready = true;
          break;
       }
       case ULRSTATE_PHASE2:
       {
+          Logger::s6as6d().warn("into phase2  (%u)", phase);
          ready = m_dbexecuted & ULRDB_GET_IMSI_INFO;
          break;
       }
       case ULRSTATE_PHASE3:
       {
+          Logger::s6as6d().warn("into phase3  (%u)", phase);
          ready =
                FLAG_IS_SET(m_ulrflags, ULR_SKIP_SUBSCRIBER_DATA) ||
                (m_dbexecuted & ULRDB_GET_EVNTS_EVNTIDS);
@@ -1102,16 +1195,20 @@ bool ULRProcessor::phaseReady(int phase, uint32_t adjustment)
       }
       case ULRSTATE_PHASE4:
       {
+          Logger::s6as6d().warn("into phase4  phase(%u) m_dbexecuted(%u) ULRDB_GET_MMEID_HOST(%x)", phase, m_dbexecuted, ULRDB_GET_MMEID_HOST);
          ready = m_dbexecuted & ULRDB_GET_MMEID_HOST;
+          Logger::s6as6d().warn("into phase4  ready:(%u)", ready);
          break;
       }
       case ULRSTATE_PHASE5:
       {
+          Logger::s6as6d().warn("into phase5  (%u)", phase);
          ready = m_dbexecuted & ULRDB_UPDATE_IMSI;
          break;
       }
       case ULRSTATE_PHASEFINAL:
       {
+          Logger::s6as6d().warn("into ULRSTATE_PHASEFINAL  (%u)", phase);
 #ifdef TRACK_EXECUTION
 printf("%lld,%s,%p,%s,m_dbissued=%d,m_msgissued=%d\n",STIMER_GET_CURRENT_TIME,__PRETTY_FUNCTION__,this,phases[phase-ULRSTATE_BASE],m_dbissued-adjustment,m_msgissued);
 #endif
@@ -1139,6 +1236,7 @@ void ULRProcessor::processNextPhase(ULRProcessor *pthis)
 #endif
 
    {
+       Logger::s6as6d().warn("into ULRProcessor::processNextPhase ");
       SMutexLock l(pthis->m_mutex, false);
 
       // check to see if there is already a worker processing
@@ -1156,31 +1254,37 @@ printf("%lld,%s,%p,%s\n",STIMER_GET_CURRENT_TIME,__PRETTY_FUNCTION__,pthis,phase
          {
             case ULRSTATE_PHASE1:
             {
+                Logger::s6as6d().warn("into phase1  (%u)", pthis->m_nextphase);
                pthis->phase1();
                break;
             }
             case ULRSTATE_PHASE2:
             {
+                Logger::s6as6d().warn("into phase2  (%u)", pthis->m_nextphase);
                pthis->phase2();
                break;
             }
             case ULRSTATE_PHASE3:
             {
+                Logger::s6as6d().warn("into phase3  (%u)", pthis->m_nextphase);
                pthis->phase3();
                break;
             }
             case ULRSTATE_PHASE4:
             {
+                Logger::s6as6d().warn("into phase4  (%u)", pthis->m_nextphase);
                pthis->phase4();
                break;
             }
             case ULRSTATE_PHASE5:
             {
+                Logger::s6as6d().warn("into phase5   (%u)", pthis->m_nextphase);
                pthis->phase5();
                break;
             }
             case ULRSTATE_PHASEFINAL:
             {
+                Logger::s6as6d().warn("into phaseULRSTATE_PHASEFINAL (%u)", pthis->m_nextphase);
                deleteProc = pthis;
                pthis = NULL;
                break;
@@ -1387,7 +1491,10 @@ void ULRProcessor::updateImsiInfo(SCassFuture &future)
 void ULRProcessor::getMmeIdentity(SCassFuture &future)
 {
    bool success = m_app.dataaccess().getMmeIdFromHostData(future, m_mmeidentity);
+    Logger::s6as6d().warn("into ULRProcessor::getMmeIdentity  success:(%d)", success);
    DB_OP_COMPLETE(ULRDB_GET_MMEID_HOST, m_dbexecuted, m_dbresult, success);
+    Logger::s6as6d().warn("into ULRProcessor::getMmeIdentity  success:(%d), ULRDB_GET_MMEID_HOST:(%x), m_dbexecuted:(%x), m_dbresult:(%x)",
+            success, ULRDB_GET_MMEID_HOST, m_dbexecuted, m_dbresult);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1821,18 +1928,22 @@ void ULRProcessor::phase4()
 {
    m_nextphase = ULRSTATE_PHASE5;
 
+    Logger::s6as6d().warn("into ULRProcessor::phase4  m_nextphase: (%x), m_dbresult:(%x), ULRDB_GET_MMEID_HOST:(%x)",
+            m_nextphase, m_dbresult, ULRDB_GET_MMEID_HOST);
    if (!(m_dbresult & ULRDB_GET_MMEID_HOST))
    {
       Logger::s6as6d().warn(
             "The MME host [%s] was not found (even though the DIAMETER connection was authorized)",
             m_new_info.mmehost.c_str());
    }
-
+    Logger::s6as6d().warn("m_mmeidentity: (%x)", m_mmeidentity);
    m_new_info.mme_id = m_mmeidentity;
 
    atomic_inc_fetch(m_dbissued);
    bool success = m_app.dataaccess().updateLocation(m_new_info, m_present_flags, m_mmeidentity,
          on_ulr_callback, new ULRDatabaseAction(ULRDB_UPDATE_IMSI, *this));
+
+   Logger::s6as6d().warn("success: (%x)", success);
    if (!success)
    {
       DB_OP_COMPLETE(ULRDB_UPDATE_IMSI, m_dbexecuted, m_dbresult, false);
