@@ -55,6 +55,7 @@ void HSSWorkerQueue::addProcessor(QueueProcessor *processor)
 
 void HSSWorkerQueue::startProcessor()
 {
+    Logger::s6as6d().warn("HSSWorkerQueue::startProcessor");
    QueueProcessor *processor = (QueueProcessor*)startMessage();
    if (processor)
       processor->triggerNextPhase();
@@ -208,17 +209,20 @@ bool FDHss::init(hss_config_t * hss_config_p){
       std::cout << "Exception starting REST server - " << e.what() << std::endl;
       return false;
    }
-
+    Logger::system().startup( "");
+    Logger::system().startup( "HookEvent::init");
    HookEvent::init(&StatsHss::singleton(), m_s6tapp, m_s6aapp, m_s6capp);
 
    //
    // set the ULR queue concurrent value
    //
+    Logger::system().startup( "set the ULR queue concurrent value");
    m_workerqueue.setConcurrent(Options::getconcurrent());
 
    //
    // starts the stats
    //
+    Logger::system().startup( "starts the stats");
    StatsHss::singleton().setInterval(Options::statsFrequency());
    StatsHss::singleton().init( NULL );
 

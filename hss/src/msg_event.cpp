@@ -16,6 +16,7 @@
 
 
 #include "msg_event.h"
+#include "logger.h"
 
 #include <iostream>
 #include <functional>
@@ -33,6 +34,7 @@ void HookEvent::init(SStats* stat, s6t::Application *s6t, s6as6d::Application *s
    m_s6as6d = s6as6d;
    m_s6c = s6c;
 
+    Logger::s6as6d().warn("into msg_event.cpp HookEvent::init");
    uint32_t mask_errors;
    mask_errors = HOOK_MASK( HOOK_MESSAGE_PARSING_ERROR, HOOK_MESSAGE_ROUTING_ERROR, HOOK_MESSAGE_DROPPED  );
    fd_hook_register( mask_errors, md_hook_cb_error, NULL, NULL, &m_hdl[0] );
@@ -53,15 +55,19 @@ void HookEvent::md_hook_cb_error(enum fd_hook_type type, struct msg * msg, struc
 
          if( (hdr->msg_appl == m_s6as6d->getDict().app().getId()) ){
             if( hdr->msg_code == m_s6as6d->getDict().cmdAUIR().getCommandCode() && isRequest ){
+                Logger::s6as6d().warn("into air receive error");
                m_stat->registerStatAttemp(stat_hss_air, stat_received_ko);
             }
             else if ( (hdr->msg_code == m_s6as6d->getDict().cmdAUIA().getCommandCode()) && !isRequest ){
+                Logger::s6as6d().warn("into air send error");
                m_stat->registerStatAttemp(stat_hss_air, stat_sent_ko);
             }
             else if( (hdr->msg_code == m_s6as6d->getDict().cmdUPLR().getCommandCode()) && isRequest ){
+                Logger::s6as6d().warn("into ulr receive error");
                m_stat->registerStatAttemp(stat_hss_ulr, stat_received_ko);
             }
             else if( (hdr->msg_code == m_s6as6d->getDict().cmdUPLA().getCommandCode()) && !isRequest ){
+                Logger::s6as6d().warn("into ulr receive error");
                m_stat->registerStatAttemp(stat_hss_ulr, stat_sent_ko);
             }
             else if( (hdr->msg_code == m_s6as6d->getDict().cmdPUUR().getCommandCode()) && isRequest ){
@@ -119,15 +125,19 @@ void HookEvent::md_hook_cb_ok(enum fd_hook_type type, struct msg * msg, struct p
 
          if( (hdr->msg_appl == m_s6as6d->getDict().app().getId()) ){
             if( hdr->msg_code == m_s6as6d->getDict().cmdAUIR().getCommandCode() && isRequest ){
+                Logger::s6as6d().warn("into air receive ok");
                m_stat->registerStatAttemp(stat_hss_air, stat_attemp_received);
             }
             else if ( (hdr->msg_code == m_s6as6d->getDict().cmdAUIA().getCommandCode()) && !isRequest ){
+                Logger::s6as6d().warn("into air send ok");
                m_stat->registerStatAttemp(stat_hss_air, stat_attemp_sent);
             }
             else if( (hdr->msg_code == m_s6as6d->getDict().cmdUPLR().getCommandCode()) && isRequest ){
+                Logger::s6as6d().warn("into ulr receive ok");
                m_stat->registerStatAttemp(stat_hss_ulr, stat_attemp_received);
             }
             else if( (hdr->msg_code == m_s6as6d->getDict().cmdUPLA().getCommandCode()) && !isRequest ){
+                Logger::s6as6d().warn("into ulr send ok");
                m_stat->registerStatAttemp(stat_hss_ulr, stat_attemp_sent);
             }
             else if( (hdr->msg_code == m_s6as6d->getDict().cmdPUUR().getCommandCode()) && isRequest ){

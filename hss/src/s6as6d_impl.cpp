@@ -234,6 +234,7 @@ void display_error_message(const char *err_msg)
 
 int UPLRcmd::process( FDMessageRequest *req )
 {
+    Logger::s6as6d().warn("into UPLRcmd::process");
    ULRProcessor *p = new ULRProcessor( *req, m_app, m_app.getDict() );
    fdHss.getWorkerQueue().addProcessor(p);
    fdHss.getWorkerQueue().startProcessor();
@@ -353,6 +354,7 @@ void AUIRreq::processAnswer( FDMessageAnswer &ans )
 
 int AUIRcmd::process( FDMessageRequest *req )
 {
+    Logger::s6as6d().warn("into AUIRcmd::process");
    AIRProcessor *p = new AIRProcessor(*req, m_app, m_app.getDict());
    fdHss.getWorkerQueue().addProcessor(p);
    fdHss.getWorkerQueue().startProcessor();
@@ -1071,6 +1073,7 @@ ULRProcessor::~ULRProcessor()
 
 void ULRProcessor::on_ulr_callback(CassFuture *future, void *data)
 {
+    Logger::s6as6d().warn("ULRProcessor::on_ulr_callback");
    SCassFuture f(future,true);
    ULRDatabaseAction *action = (ULRDatabaseAction*)data;
 #ifdef TRACK_EXECUTION
@@ -1147,6 +1150,7 @@ printf("%lld,%s,%p,%s\n",STIMER_GET_CURRENT_TIME,__PRETTY_FUNCTION__,&action->ge
 
 void ULRProcessor::triggerNextPhase()
 {
+    Logger::s6as6d().warn("into ULRProcessor::triggerNextPhase");
    atomic_inc_fetch(m_msgissued);
    fdHss.getWorkMgr().addWork(
          new WorkerMessage(WORKER_EVENT,
@@ -1208,7 +1212,7 @@ bool ULRProcessor::phaseReady(int phase, uint32_t adjustment)
       }
       case ULRSTATE_PHASEFINAL:
       {
-          Logger::s6as6d().warn("into ULRSTATE_PHASEFINAL  (%u)", phase);
+          Logger::s6as6d().warn("into phaseULRSTATE_PHASEFINAL  (%u)", phase);
 #ifdef TRACK_EXECUTION
 printf("%lld,%s,%p,%s,m_dbissued=%d,m_msgissued=%d\n",STIMER_GET_CURRENT_TIME,__PRETTY_FUNCTION__,this,phases[phase-ULRSTATE_BASE],m_dbissued-adjustment,m_msgissued);
 #endif
@@ -1313,12 +1317,14 @@ printf("%lld,%s,%p,%s\n",STIMER_GET_CURRENT_TIME,__PRETTY_FUNCTION__,pthis,phase
 
 void ULRProcessor::getImsiInfo(SCassFuture &future)
 {
+    Logger::s6as6d().warn(" into ULRProcessor::getImsiInfo");
    bool success =  m_app.dataaccess().getImsiInfoData(future, m_orig_info);
    DB_OP_COMPLETE(ULRDB_GET_IMSI_INFO, m_dbexecuted, m_dbresult, success);
 }
 
 void ULRProcessor::getExternalIds(SCassFuture &future)
 {
+    Logger::s6as6d().warn("into ULRProcessor::getExternalIds");
    bool success = m_app.dataaccess().getExtIdsFromImsiData( future, m_extIdLst );
    DB_OP_COMPLETE(ULRDB_GET_EXT_IDS, m_dbexecuted, m_dbresult, success);
 
@@ -1417,7 +1423,7 @@ void ULRProcessor::getEvents()
    bool success = false;
    std::string scef_id = "";
    std::list<uint32_t> scef_ref_ids;
-
+    Logger::s6as6d().warn("into ULRProcessor::getEvents");
    if (m_evtIdLst.size() == 0)
    {
       DB_OP_COMPLETE(ULRDB_GET_EVNTS_EVNTIDS, m_dbexecuted, m_dbresult, true);
@@ -1466,7 +1472,7 @@ void ULRProcessor::getEvents()
 void ULRProcessor::getEvents(SCassFuture &future)
 {
    bool success;
-
+    Logger::s6as6d().warn(" into ULRProcessor::getEvents(SCassFuture &future)");
    {
       SMutexLock l(m_mutex);
       success = m_app.dataaccess().getEventsData(future, m_evtLst);
@@ -1505,7 +1511,7 @@ void ULRProcessor::phase1()
 #ifdef PERFORMANCE_TIMING
    stimer_t start_timer = STIMER_GET_CURRENT_TIME;
 #endif
-
+    Logger::s6as6d().warn(" into ULRProcessor::phase1()");
    m_ans.addOrigin();
 
    m_ulr.auth_session_state.get( u32 );
@@ -1612,7 +1618,7 @@ void ULRProcessor::phase2()
 {
    std::string s;
    uint32_t u32;
-
+    Logger::s6as6d().warn(" into ULRProcessor::phase2()");
    if (!(m_dbresult & ULRDB_GET_IMSI_INFO))
    {
       FDAvp er ( m_dict.avpExperimentalResult() );
@@ -1819,6 +1825,7 @@ void ULRProcessor::phase2()
 
 void ULRProcessor::phase3()
 {
+    Logger::s6as6d().warn(" into ULRProcessor::phase3()");
    if (!FLAG_IS_SET(m_ulrflags, ULR_SKIP_SUBSCRIBER_DATA))
    {
       for ( DAExtIdList::iterator it = m_extIdLst.begin(); it != m_extIdLst.end(); ++it )
@@ -1954,6 +1961,7 @@ void ULRProcessor::phase4()
 
 void ULRProcessor::phase5()
 {
+    Logger::s6as6d().warn(" into ULRProcessor::phase5()");
    m_nextphase = ULRSTATE_PHASEFINAL;
 }
 
@@ -1974,7 +1982,7 @@ void AIRStateProcessor::process()
 {
    if (!m_processor)
       return;
-
+    Logger::s6as6d().warn(" into AIRStateProcessor::process()");
    AIRProcessor::processNextPhase(m_processor);
 }
 
@@ -2009,6 +2017,7 @@ AIRProcessor::~AIRProcessor()
 
 void AIRProcessor::on_air_callback(CassFuture *future, void *data)
 {
+    Logger::s6as6d().warn("AIRProcessor::on_air_callback");
    SCassFuture f(future,true);
    AIRDatabaseAction *action = (AIRDatabaseAction*)data;
 #ifdef TRACK_EXECUTION
@@ -2048,6 +2057,7 @@ void AIRProcessor::on_air_callback(CassFuture *future, void *data)
 
 void AIRProcessor::triggerNextPhase()
 {
+    Logger::s6as6d().warn("into AIRProcessor::triggerNextPhase");
    atomic_inc_fetch(m_msgissued);
    fdHss.getWorkMgr().addWork(
          new WorkerMessage(WORKER_EVENT,
@@ -2068,7 +2078,7 @@ bool AIRProcessor::phaseReady(int phase, uint32_t adjustment)
          "UNKNOWN"
    };
 #endif
-
+    Logger::s6as6d().warn(" into AIRProcessor::phaseReady(int phase, uint32_t adjustment)");
    switch (phase)
    {
       case AIRSTATE_PHASE1:
@@ -2103,6 +2113,7 @@ bool AIRProcessor::phaseReady(int phase, uint32_t adjustment)
 
 void AIRProcessor::processNextPhase(AIRProcessor *pthis)
 {
+    Logger::s6as6d().warn("into AIRProcessor::processNextPhase");
    AIRProcessor *deleteProc = NULL;
 #ifdef TRACK_EXECUTION
    static const char *phases[] = {
@@ -2174,12 +2185,14 @@ printf("%lld,%s,%p,%s\n",STIMER_GET_CURRENT_TIME,__PRETTY_FUNCTION__,pthis,phase
 
 void AIRProcessor::getImsiSec(SCassFuture &future)
 {
+    Logger::s6as6d().warn("into AIRProcessor::getImsiSec");
    bool success =  m_app.dataaccess().getImsiSecData(future, m_sec);
    DB_OP_COMPLETE(AIRDB_GET_IMSI_SEC, m_dbexecuted, m_dbresult, success);
 }
 
 void AIRProcessor::updateImsi(SCassFuture &future)
 {
+    Logger::s6as6d().warn("into AIRProcessor::updateImsi");
    bool success = future.errorCode() == CASS_OK;
    DB_OP_COMPLETE(AIRDB_UPDATE_IMSI, m_dbexecuted, m_dbresult, success);
 
@@ -2194,6 +2207,7 @@ void AIRProcessor::updateImsi(SCassFuture &future)
 
 void AIRProcessor::phase1()
 {
+    Logger::s6as6d().warn("into AIRProcessor::phase1");
    uint32_t u32;
 
    m_ans.addOrigin();
@@ -2316,6 +2330,7 @@ void AIRProcessor::phase1()
 
 void AIRProcessor::phase2()
 {
+    Logger::s6as6d().warn("into AIRProcessor::phase2");
    if (!(m_dbresult & AIRDB_GET_IMSI_SEC))
    {
       FDAvp er (m_dict.avpExperimentalResult());
@@ -2385,5 +2400,6 @@ void AIRProcessor::phase2()
 
 void AIRProcessor::phase3()
 {
+    Logger::s6as6d().warn("into AIRProcessor::phase3");
    m_nextphase = AIRSTATE_PHASEFINAL;
 }

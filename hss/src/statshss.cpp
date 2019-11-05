@@ -15,6 +15,7 @@
 */
 
 #include "statshss.h"
+#include "logger.h"
 
 #include <sstream>
 #include <freeDiameter/freeDiameter-host.h>
@@ -122,12 +123,15 @@ void StatsHss::dispatchDerived(SEventThreadMessage &msg){
    switch ( msg.getId() )
    {
       case STAT_ATTEMPT_MSG:
+          Logger::s6as6d().warn("into STAT_ATTEMPT_MSG");
          processStatAttemp((StatAttempMessage&)msg);
          break;
       case STAT_RSLT_MSG:
+          Logger::s6as6d().warn("into STAT_RSLT_MSG");
          processStatResult((StatResultMessage&)msg);
          break;
       case STAT_GET_LIVE:
+          Logger::s6as6d().warn("into STAT_GET_LIVE");
          processStatGetLive((StatLive&)msg);
          break;
       default:
@@ -139,9 +143,11 @@ void StatsHss::processStatAttemp(StatAttempMessage& stat){
    switch( stat.getType() )
    {
       case stat_hss_ulr:
+          Logger::s6as6d().warn("into StatsHss::processStatAttemp stat_hss_ulr");
          m_ulr_collector.addAttempt(stat.getAttempType());
          break;
       case stat_hss_air:
+          Logger::s6as6d().warn("into StatsHss::processStatAttemp stat_hss_air");
          m_air_collector.addAttempt(stat.getAttempType());
          break;
       case stat_hss_pur:
@@ -171,9 +177,11 @@ void StatsHss::processStatResult(StatResultMessage& stat){
    switch( stat.getType() )
    {
       case stat_hss_ulr:
+          Logger::s6as6d().warn("into StatsHss::processStatResult stat_hss_ulr");
          m_ulr_collector.addStat(stat.getVendor(), stat.getCode());
          break;
       case stat_hss_air:
+          Logger::s6as6d().warn("into StatsHss::processStatResult stat_hss_air");
          m_air_collector.addStat(stat.getVendor(), stat.getCode());
          break;
       case stat_hss_pur:
