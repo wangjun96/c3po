@@ -60,7 +60,7 @@ WorkerMessage *WorkerManager::getWork()
 
 void WorkerManager::waitForShutdown()
 {
-    Logger::s6as6d().warn("into WorkerManager::waitForShutdown---%d", numWorkers);
+    Logger::s6as6d().warn("into WorkerManager::waitForShutdown---%d", m_numWorkers);
    if (m_numWorkers == 0)
    {
       m_shutdown.set();
