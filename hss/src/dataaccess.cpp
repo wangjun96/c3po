@@ -153,6 +153,7 @@ void DataAccess::disconnect()
 
 bool DataAccess::addEvent( DAEvent &event )
 {
+    Logger::s6as6d().warn("into DataAccess::addEvent");
 	std::stringstream ss;
 
 	// insert the event
@@ -243,6 +244,7 @@ bool DataAccess::addEvent( DAEvent &event )
 bool DataAccess::getEvent( const char *scef_id, uint32_t scef_ref_id, DAEvent &event )
 {
    std::stringstream ss;
+    Logger::s6as6d().warn("into DataAccess::getEvent");
 
    ss << "SELECT * FROM events WHERE "
       << "scef_id = '" << scef_id << "' "
@@ -286,7 +288,7 @@ bool DataAccess::getEvent( const char *scef_id, uint32_t scef_ref_id, DAEvent &e
 bool DataAccess::getEvents( const char *scef_id, std::list<uint32_t> scef_ref_ids, DAEventList &events, CassFutureCallback cb, void *data )
 {
    std::stringstream ss;
-
+    Logger::s6as6d().warn("into DataAccess::getEvents111111");
    ss << "SELECT * FROM events WHERE "
       << "scef_id = '" << scef_id << "' "
       << "AND scef_ref_id = (";
@@ -315,6 +317,7 @@ bool DataAccess::getEvents( const char *scef_id, std::list<uint32_t> scef_ref_id
 
 bool DataAccess::getEventsData( SCassFuture &future, DAEventList &events )
 {
+    Logger::s6as6d().warn("into DataAccess::getEventsData--------");
    if ( future.errorCode() != CASS_OK )
    {
       Logger::system().error( "DataAccess::%s - Error %d executing getEvents()",
@@ -352,7 +355,7 @@ void DataAccess::deleteEvent( const char *scef_id, uint32_t scef_ref_id )
 {
    DAEvent event;
    std::stringstream ss;
-
+    Logger::s6as6d().warn("into DataAccess::deleteEvent");
    if ( !getEvent( scef_id, scef_ref_id, event ) )
       return;
 
@@ -422,7 +425,7 @@ void DataAccess::deleteEvent( const char *scef_id, uint32_t scef_ref_id )
 bool DataAccess::checkMSISDNExists( int64_t msisdn )
 {
    std::stringstream ss;
-
+    Logger::s6as6d().warn("into DataAccess::checkMSISDNExists");
    ss << "SELECT * FROM msisdn_imsi WHERE msisdn=" << msisdn << ";" ;
 
    SCassStatement stmt( ss.str().c_str() );
@@ -453,7 +456,7 @@ bool DataAccess::checkMSISDNExists( int64_t msisdn )
 bool DataAccess::checkImsiExists( const char *imsi )
 {
    std::stringstream ss;
-
+    Logger::s6as6d().warn("into DataAccess::checkImsiExists222");
    ss << "SELECT imsi FROM users_imsi WHERE imsi='" << imsi << "';";
 
    SCassStatement stmt( ss.str().c_str() );
@@ -484,7 +487,7 @@ bool DataAccess::checkImsiExists( const char *imsi )
 bool DataAccess::checkExtIdExists( const char *extid )
 {
    std::stringstream ss;
-
+    Logger::s6as6d().warn("into DataAccess::checkImsiExists333");
    ss << "SELECT extid FROM extid WHERE extid = '" << extid << "';" ;
 
    SCassStatement stmt( ss.str().c_str() );
