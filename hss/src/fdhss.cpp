@@ -57,6 +57,7 @@ void HSSWorkerQueue::startProcessor()
 {
     Logger::s6as6d().warn("HSSWorkerQueue::startProcessor");
    QueueProcessor *processor = (QueueProcessor*)startMessage();
+    Logger::s6as6d().warn("HSSWorkerQueue::startProcessor, processor == NULL: %s", processor == NULL ? "yes" : "no");
    if (processor)
       processor->triggerNextPhase();
 }

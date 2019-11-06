@@ -27,6 +27,7 @@ WorkerManager::~WorkerManager()
 
 bool WorkerManager::init(int numWorkers)
 {
+    Logger::s6as6d().warn("into WorkerManager::init---%d", numWorkers);
    for (int i=0; i<numWorkers; i++)
    {
       WorkerThread *wt = new WorkerThread(*this);
@@ -47,16 +48,19 @@ bool WorkerManager::init(int numWorkers)
 
 bool WorkerManager::addWork(WorkerMessage *msg)
 {
+    Logger::s6as6d().warn("into WorkerManager::addWork");
    return m_queue.push(msg);
 }
 
 WorkerMessage *WorkerManager::getWork()
 {
+    Logger::s6as6d().warn("into WorkerManager::getWork");
    return (WorkerMessage*)m_queue.pop();
 }
 
 void WorkerManager::waitForShutdown()
 {
+    Logger::s6as6d().warn("into WorkerManager::waitForShutdown---%d", numWorkers);
    if (m_numWorkers == 0)
    {
       m_shutdown.set();
@@ -71,6 +75,7 @@ void WorkerManager::waitForShutdown()
 
 void WorkerManager::threadShutdown()
 {
+    Logger::s6as6d().warn("into WorkerManager::threadShutdown");
    SMutexLock l(m_mutex);
    m_numWorkers--;
    if (m_numWorkers <= 0)
@@ -114,7 +119,7 @@ WorkerThread::~WorkerThread()
 unsigned long WorkerThread::threadProc(void *arg)
 {
    WorkerMessage *msg;
-
+    Logger::s6as6d().warn("into WorkerManager::threadProc");
    for(;;)
    {
       msg = m_mgr.getWork();
